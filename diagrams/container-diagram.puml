@@ -1,0 +1,88 @@
+@startuml
+!include <C4/C4_Container>
+
+title CloudChat
+
+Person(client, "Client", "Web/Mobile app")
+
+System_Boundary(sys, "CloudChat") {
+    Container(frontend, "Frontend", "Vue.js / React", "SPA with WebSocket")
+    Container(api, "Api Gateway", "Spring Cloud Gateway", "Routing, JWT validation, rate limiting")
+    Container(auth, "Auth Service", "Spring Boot", "OAuth2, JWT, registration")
+
+    System_Boundary(broker, "Message Brokers") {
+        ContainerQueue(rabbitmq, "RabbitMQ", "STOMP", "Real-time broadcast")
+        ContainerQueue(kafka, "Kafka", "Event Streaming", "Event sourcing")
+        Container(schemaReg, "Schema Registry", "Confluent", "Avro schemas")
+    }
+
+    System_Boundary(services, "Core Services") {
+        Container(message, "Message Service", "Spring Boot + WebSocket", "WebSocket connections, message persistence")
+        Container(chat, "Chat Service", "Spring Boot", "Chat CRUD, members")
+        Container(media, "Media Service", "Spring Boot", "File uploads, processing")
+        Container(user, "User Service", "Spring Boot + WebSocket", "User profiles, contacts, presence (online/offline/typing)")
+    }
+
+    System_Boundary(data, "Data Layer") {
+        ContainerDb(postgres, "PostgreSQL", "RDBMS", "Users, chats, metadata")
+        ContainerDb(scylla, "ScyllaDB", "NoSQL", "Messages (time-series)")
+        ContainerDb(redis, "Redis", "Cache", "Sessions, presence, rate limits")
+        ContainerDb(minio, "MinIO", "S3", "Files, media")
+    }
+}
+
+System_Ext(smtp, "SMTP", "Email")
+
+Boundary(observability, "Observability") {
+    System_Ext(prom, "Prometheus", "Metrics")
+    System_Ext(tempo, "Tempo", "Traces")
+    System_Ext(grafana, "Grafana", "Dashboards")
+    System_Ext(loki, "Loki", "Logs")
+}
+
+Rel(client, frontend, "HTTPS/WSS")
+Rel(frontend, api, "HTTPS/WSS")
+
+' API Gateway routes (direct DNS/Docker)
+Rel(api, auth, "HTTP")
+Rel(api, message, "HTTPS/WSS")
+Rel(api, user, "HTTPS/WSS")
+Rel(api, chat, "HTTP")
+Rel(api, media, "HTTP")
+
+' Message flow
+Rel(message, rabbitmq, "STOMP")
+Rel(message, kafka, "Events")
+Rel(message, scylla, "CQL")
+'Rel(message, redis, "Cache")
+
+' Auth
+Rel(auth, postgres, "JDBC")
+Rel(auth, redis, "Redis")
+Rel(auth, kafka, "Events")
+Rel(auth, smtp, "SMTP")
+
+' User + Presence
+Rel(user, postgres, "JDBC")
+Rel(user, redis, "Presence data")
+Rel(kafka, user, "Events")
+
+' Chat
+Rel(chat, postgres, "JDBC")
+Rel(chat, redis, "Redis")
+Rel(chat, kafka, "Events")
+
+' Media
+Rel(media, minio, "S3 API")
+Rel(media, postgres, "Metadata")
+
+' Rate limiting
+Rel(api, redis, "Rate limits")
+
+Rel(kafka, schemaReg, "HTTP")
+
+Rel(sys, observability, "Metrics/Traces/Logs")
+
+LAYOUT_LEFT_RIGHT()
+
+@enduml

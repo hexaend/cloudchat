@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Context>
+
+title CloudChat - System Context
+
+Person_Ext(client, "Client", "A person using the chat application")
+Person(admin, "Administrator", "System administrator")
+
+System(cloudchat, "CloudChat", "A cloud-based chat system providing real-time messaging, file sharing, and collaboration")
+
+System_Ext(prom, "Prometheus", "Metrics")
+System_Ext(tempo, "Tempo", "Traces (OTLP)")
+System_Ext(grafana, "Grafana", "Dashboards")
+System_Ext(loki, "Loki", "Logs")
+
+Rel(client, cloudchat, "Uses", "HTTPS/WebSocket")
+Rel(admin, cloudchat, "Administers", "HTTPS")
+Rel(cloudchat, prom, "Sends metrics to")
+Rel(cloudchat, tempo, "Sends traces to")
+Rel(cloudchat, loki, "Sends logs to")
+Rel(admin, grafana, "Views dashboards in")
+Rel(grafana, prom, "Read metrics")
+Rel(grafana, tempo, "Read traces")
+Rel(grafana, loki, "Read logs")
+
+@enduml
