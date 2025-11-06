@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  main_database_postgres:
+    image: postgres:latest
+    container_name: main_database_postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - main_postgres_data:/var/lib/postgresql
+
+volumes:
+    main_postgres_data:

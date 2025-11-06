@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/cloudchat.iml" filepath="$PROJECT_DIR$/cloudchat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/auth-service/cloudchat.auth-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/auth-service/cloudchat.auth-service.main.iml" />
     </modules>
   </component>
 </project>
