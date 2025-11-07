@@ -12,18 +12,11 @@ dependencies {
 
     //  Security Dependencies
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    // TODO: replace version to file
-    implementation("io.jsonwebtoken:jjwt:0.13.0")
 
     // JPA and Database Dependencies
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("org.postgresql:postgresql")
 
     // Other
-    implementation("org.mapstruct:mapstruct:1.6.3")
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 
     // Test Dependencies
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

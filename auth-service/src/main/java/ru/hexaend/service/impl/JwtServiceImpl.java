@@ -1,15 +1,19 @@
 package ru.hexaend.service.impl;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.hexaend.config.RsaPropertiesConfig;
+import ru.hexaend.entity.User;
 import ru.hexaend.service.JwtService;
 
-import javax.crypto.SecretKey;
+import java.text.ParseException;
 import java.util.Date;
 
 @Service
@@ -17,41 +21,67 @@ import java.util.Date;
 @Slf4j
 public class JwtServiceImpl implements JwtService {
 
-    private final PasswordEncoder passwordEncoder;
+    private final int refreshTokenExpirationDays = 7;
+    private final int accessTokenExpirationMinutes = 15;
+    private final RsaPropertiesConfig rsaPropertiesConfig;
 
-    SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode("replacethiswithyourownbase64encodedsecretkey"));
 
     @Override
-    public String generateAccessToken(String username) {
-        final Date accessTokenExpiration = new Date(System.currentTimeMillis() + 15 * 60 * 1000); // 15 minutes
-        return Jwts.builder()
-                .subject(username)
-                .signWith(key)
-                .expiration(accessTokenExpiration)
-                .claim("role", "USER") // TODO: get user role from database
-                .claim("firstName", "John") // TODO: get user first name from database
-                .claim("lastName", "Doe") // TODO: get user last name from database
-                .compact();
+    public String generateAccessToken(User user) {
+        return generateToken(user, accessTokenExpirationMinutes * 60 * 1000);
     }
 
-    public Jwt<?, ?> decodeToken(String token) {
+    @Override
+    public String generateRefreshToken(User user) {
+        return generateToken(user, refreshTokenExpirationDays * 24 * 60 * 60 * 1000);
+    }
+
+    @Override
+    public boolean validateToken(String jwtToken) {
+        SignedJWT signedJWT = null;
         try {
-            log.info("Decoding token: {}", token);
-            return Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parse(token);
-        } catch (ExpiredJwtException expEx) {
-            log.error("Token expired", expEx);
-        } catch (UnsupportedJwtException unsEx) {
-            log.error("Unsupported jwt", unsEx);
-        } catch (MalformedJwtException mjEx) {
-            log.error("Malformed jwt", mjEx);
-        } catch (Exception e) {
-            log.error("invalid token", e);
+            signedJWT = SignedJWT.parse(jwtToken);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public String getUsernameFromToken(String jwtToken)  {
+        SignedJWT signedJWT = null;
+        try {
+            signedJWT = SignedJWT.parse(jwtToken);
+            return signedJWT.getJWTClaimsSet().getSubject();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String generateToken(User user, long expirationMillis) {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+        Date expiration = new Date(nowMillis + expirationMillis);
+
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .subject(user.getUsername())
+                // TODO: move issuer to application properties
+                .issuer("http://localhost:8081")
+                .jwtID(String.valueOf(user.getId()))
+                .issueTime(now)
+                .expirationTime(expiration)
+                .claim("authorities", user.getAuthorities())
+                .claim("email", user.getEmail())
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claims);
+        RSASSASigner signer = new RSASSASigner(rsaPropertiesConfig.getPrivateKey());
+        try {
+            signedJWT.sign(signer);
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
         }
 
-        return null;
+        return signedJWT.serialize();
     }
-
 }
