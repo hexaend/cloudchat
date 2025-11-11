@@ -14,7 +14,6 @@ import ru.hexaend.auth_service.exception.EmailAlreadyInUseException;
 import ru.hexaend.auth_service.exception.UsernameAlreadyInUseException;
 import ru.hexaend.auth_service.mapper.UserMapper;
 import ru.hexaend.auth_service.repository.UserRepository;
-import ru.hexaend.auth_service.service.UserDetailsService;
 
 import java.util.Optional;
 

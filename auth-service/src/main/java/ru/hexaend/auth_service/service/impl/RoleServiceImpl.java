@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hexaend.auth_service.entity.Role;
 import ru.hexaend.auth_service.exception.EntityNotFoundException;
 import ru.hexaend.auth_service.repository.RoleRepository;
-import ru.hexaend.auth_service.service.RoleService;
+import ru.hexaend.auth_service.service.interfaces.RoleService;
 
 import java.util.List;
 

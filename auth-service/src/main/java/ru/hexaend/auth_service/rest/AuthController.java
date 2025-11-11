@@ -2,15 +2,14 @@ package ru.hexaend.auth_service.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.hexaend.auth_service.dto.request.AuthRequest;
 import ru.hexaend.auth_service.dto.request.RefreshTokenRequest;
 import ru.hexaend.auth_service.dto.request.RegisterRequest;
 import ru.hexaend.auth_service.dto.response.AuthResponse;
-import ru.hexaend.auth_service.dto.response.RegisterStatusResponse;
-import ru.hexaend.auth_service.service.AuthService;
-import ru.hexaend.auth_service.service.UserDetailsService;
+import ru.hexaend.auth_service.dto.response.VerifyStatusRequest;
+import ru.hexaend.auth_service.service.interfaces.AuthService;
+import ru.hexaend.auth_service.service.interfaces.UserDetailsService;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterStatusResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<VerifyStatusRequest> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(userDetailsService.register(request));
     }
 

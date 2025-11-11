@@ -1,14 +1,12 @@
 package ru.hexaend.auth_service.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import ru.hexaend.auth_service.entity.User;
-import ru.hexaend.auth_service.service.EmailService;
+import ru.hexaend.auth_service.service.interfaces.EmailService;
 
 @RequiredArgsConstructor
 @Service

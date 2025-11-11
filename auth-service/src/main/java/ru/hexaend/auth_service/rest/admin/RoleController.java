@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.hexaend.auth_service.dto.response.RoleResponse;
 import ru.hexaend.auth_service.entity.Role;
 import ru.hexaend.auth_service.mapper.RoleMapper;
-import ru.hexaend.auth_service.service.RoleService;
+import ru.hexaend.auth_service.service.interfaces.RoleService;
 
 import java.util.List;
 

@@ -15,9 +15,9 @@ import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.InvalidPasswordException;
 import ru.hexaend.auth_service.exception.LimitRefreshTokenException;
 import ru.hexaend.auth_service.repository.UserRepository;
-import ru.hexaend.auth_service.service.JwtService;
-import ru.hexaend.auth_service.service.OpaqueService;
-import ru.hexaend.auth_service.service.UserDetailsService;
+import ru.hexaend.auth_service.service.interfaces.JwtService;
+import ru.hexaend.auth_service.service.interfaces.OpaqueService;
+import ru.hexaend.auth_service.service.interfaces.UserDetailsService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

@@ -14,9 +14,9 @@ import ru.hexaend.auth_service.exception.InvalidPasswordException;
 import ru.hexaend.auth_service.exception.LimitRefreshTokenException;
 import ru.hexaend.auth_service.repository.UserRepository;
 import ru.hexaend.auth_service.repository.VerificationCodeRepository;
-import ru.hexaend.auth_service.service.AuthService;
-import ru.hexaend.auth_service.service.JwtService;
-import ru.hexaend.auth_service.service.OpaqueService;
+import ru.hexaend.auth_service.service.interfaces.AuthService;
+import ru.hexaend.auth_service.service.interfaces.JwtService;
+import ru.hexaend.auth_service.service.interfaces.OpaqueService;
 
 @Service
 @RequiredArgsConstructor

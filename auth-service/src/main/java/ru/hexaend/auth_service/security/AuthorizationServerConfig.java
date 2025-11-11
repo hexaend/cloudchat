@@ -27,8 +27,6 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class AuthorizationServerConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
@@ -76,19 +74,4 @@ public class AuthorizationServerConfig {
         return http.formLogin(withDefaults()).build();
     }
 
-    @Bean
-    @Order(2)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/auth/**")
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()
-                )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
 }

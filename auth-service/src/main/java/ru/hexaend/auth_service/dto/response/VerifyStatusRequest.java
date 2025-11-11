@@ -1,6 +1,6 @@
 package ru.hexaend.auth_service.dto.response;
 
-public record RegisterStatusResponse(
+public record VerifyStatusRequest(
         String status,
         String message
 ) {

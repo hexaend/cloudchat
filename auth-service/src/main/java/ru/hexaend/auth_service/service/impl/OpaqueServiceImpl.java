@@ -7,12 +7,10 @@ import ru.hexaend.auth_service.entity.RefreshToken;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.OpaqueTokenNotFoundException;
 import ru.hexaend.auth_service.repository.RefreshTokenRepository;
-import ru.hexaend.auth_service.service.OpaqueService;
+import ru.hexaend.auth_service.service.interfaces.OpaqueService;
 import ru.hexaend.auth_service.utils.StringUtils;
 
-import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor

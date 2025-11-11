@@ -1,4 +1,4 @@
-package ru.hexaend.auth_service.service;
+package ru.hexaend.auth_service.service.interfaces;
 
 import org.springframework.data.domain.Pageable;
 import ru.hexaend.auth_service.entity.Role;

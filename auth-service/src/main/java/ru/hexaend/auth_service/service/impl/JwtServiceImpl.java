@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import ru.hexaend.auth_service.config.RsaPropertiesConfig;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.JwtException;
-import ru.hexaend.auth_service.service.JwtService;
+import ru.hexaend.auth_service.service.interfaces.JwtService;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -22,7 +22,6 @@ import java.util.Date;
 @Slf4j
 public class JwtServiceImpl implements JwtService {
 
-    private final int refreshTokenExpirationDays = 7;
     private final int accessTokenExpirationMinutes = 15;
     private final RsaPropertiesConfig rsaPropertiesConfig;
 

@@ -1,10 +1,8 @@
-package ru.hexaend.auth_service.service;
+package ru.hexaend.auth_service.service.interfaces;
 
 import ru.hexaend.auth_service.dto.request.AuthRequest;
 import ru.hexaend.auth_service.dto.request.RefreshTokenRequest;
-import ru.hexaend.auth_service.dto.request.RegisterRequest;
 import ru.hexaend.auth_service.dto.response.AuthResponse;
-import ru.hexaend.auth_service.dto.response.UserResponse;
 
 public interface AuthService {
 
