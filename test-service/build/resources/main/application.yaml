@@ -10,4 +10,3 @@ spring:
 
 server:
   port: 8082
-debug: true

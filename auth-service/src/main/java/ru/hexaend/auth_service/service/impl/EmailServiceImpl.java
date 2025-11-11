@@ -1,0 +1,36 @@
+package ru.hexaend.auth_service.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.stereotype.Service;
+import ru.hexaend.auth_service.entity.User;
+import ru.hexaend.auth_service.service.EmailService;
+
+@RequiredArgsConstructor
+@Service
+public class EmailServiceImpl implements EmailService {
+    private final JavaMailSender mailSender;
+
+    @Value("${server.port}")
+    private String port;
+
+    @Value("${server.address}")
+    private String address;
+
+    @Override
+    public void sendVerificationEmail(User user, String verificationCode) {
+        // TODO: customize email content from configuration/template
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(user.getEmail());
+        msg.setSubject("Email Verification");
+        String url = "http://" + address + ":" + port + "/auth/verify?code=" + verificationCode;
+        msg.setText("Please verify your email by clicking the following link: " + url);
+        mailSender.send(msg);
+    }
+
+
+}

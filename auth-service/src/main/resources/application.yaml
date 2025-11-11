@@ -16,11 +16,25 @@ spring:
                 connection:
                     driver_class: org.postgresql.Driver
                     dialect: org.hibernate.dialect.PostgreSQLDialect
+    mail:
+        host: localhost
+        port: 1025
+        username: ""
+        password: ""
+        properties:
+            mail:
+                smtp:
+                    auth: false
+                    starttls:
+                        enable: false
 
 server:
     port: 8081
+    address: localhost
 
 
 rsa:
     private-key: classpath:/keys/private.pem
     public-key: classpath:/keys/public.pem
+
+#debug: true

@@ -1,0 +1,50 @@
+package ru.hexaend.auth_service.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.hexaend.auth_service.entity.RefreshToken;
+import ru.hexaend.auth_service.entity.User;
+import ru.hexaend.auth_service.exception.OpaqueTokenNotFoundException;
+import ru.hexaend.auth_service.repository.RefreshTokenRepository;
+import ru.hexaend.auth_service.service.OpaqueService;
+import ru.hexaend.auth_service.utils.StringUtils;
+
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Base64;
+
+@Service
+@RequiredArgsConstructor
+public class OpaqueServiceImpl implements OpaqueService {
+
+
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    @Override
+    public String createOpaqueToken(User user) {
+        String opaqueToken = StringUtils.generateOpaqueToken();
+        // TODO: get expiry date from config
+        RefreshToken refreshToken = RefreshToken.builder()
+                .token(opaqueToken).user(user).expiryDate(
+                        Instant.ofEpochSecond(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)
+                ).build();
+
+        refreshTokenRepository.save(refreshToken);
+
+        return opaqueToken;
+    }
+
+    @Override
+    @Transactional
+    public User getUserFromToken(String token) {
+        var user = refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new OpaqueTokenNotFoundException("Refresh token not found"))
+                .getUser();
+        refreshTokenRepository.deleteByToken(token);
+
+        return user;
+    }
+
+
+}
