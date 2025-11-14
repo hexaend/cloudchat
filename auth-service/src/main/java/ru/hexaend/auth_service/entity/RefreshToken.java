@@ -2,6 +2,8 @@ package ru.hexaend.auth_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
 
@@ -20,6 +22,7 @@ public class RefreshToken {
     @SequenceGenerator(name = "refresh_token_seq", sequenceName = "refresh_token_sequence", allocationSize = 1)
     private Long id;
 
+    // TODO: maybe hash the token for security
     @Column(name = "token", nullable = false, unique = true)
     private String token;
 
@@ -29,4 +32,10 @@ public class RefreshToken {
 
     @Column(name = "expiry_date", nullable = false)
     private Instant expiryDate;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
+    private Instant createdAt = Instant.now();
+
+    // TODO: maybe soft delete with a boolean flag 'revoked', and notify user to email
 }

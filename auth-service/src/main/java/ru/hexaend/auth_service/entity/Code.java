@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VerificationCode {
+public class Code {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(name = "verification_code_seq", sequenceName = "verification_code_seq", allocationSize = 1)
@@ -25,4 +25,14 @@ public class VerificationCode {
     @JoinColumn(name = "user_id", nullable = false)
     @ManyToOne()
     private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VerificationCodeType type;
+
+    public enum VerificationCodeType {
+        EMAIL_VERIFICATION,
+        PASSWORD_RESET
+    }
+
 }

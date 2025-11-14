@@ -3,11 +3,10 @@ package ru.hexaend.auth_service.rest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hexaend.auth_service.dto.request.AuthRequest;
-import ru.hexaend.auth_service.dto.request.RefreshTokenRequest;
-import ru.hexaend.auth_service.dto.request.RegisterRequest;
+import ru.hexaend.auth_service.dto.request.*;
 import ru.hexaend.auth_service.dto.response.AuthResponse;
-import ru.hexaend.auth_service.dto.response.VerifyStatusRequest;
+import ru.hexaend.auth_service.dto.response.VerifyStatusResponse;
+import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.service.interfaces.AuthService;
 import ru.hexaend.auth_service.service.interfaces.UserDetailsService;
 
@@ -26,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<VerifyStatusRequest> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<VerifyStatusResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(userDetailsService.register(request));
     }
 
@@ -36,6 +35,17 @@ public class AuthController {
         return ResponseEntity.ok(newAccessToken);
     }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        var response = userDetailsService.resetPassword(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reset")
+    public ResponseEntity<Void> resetPasswordToken(@RequestParam("code") String code, @RequestBody NewPasswordRequest request) {
+        authService.resetPassword(code, request);
+        return ResponseEntity.ok().build();
+    }
     // TODO: user info + verify email + password reset + logout + delete account
 
     @GetMapping("/verify")
@@ -44,4 +54,19 @@ public class AuthController {
         // TODO: return to home page
         return ResponseEntity.ok().build();
     }
+
+    // TODO: maybe later implement
+//    @GetMapping("/logout")
+//    public ResponseEntity<Void> logout() {
+//        User user = userDetailsService.getCurrentUser();
+//        authService.logout(user); // TODO: change to logout from current session only
+//    }
+
+    @GetMapping("/logout_all")
+    public ResponseEntity<Void> logoutAllSessions() {
+        User user = userDetailsService.getCurrentUser();
+        userDetailsService.logoutAllSessions(user);
+        return ResponseEntity.ok().build();
+    }
+
 }

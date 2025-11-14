@@ -12,7 +12,7 @@ public class StringUtils {
     private final SecureRandom secureRandom;
 
     // TODO: move to config
-    private static final int DEFAULT_OPAQUE_BYTES = 64;
+    private static final int DEFAULT_OPAQUE_BYTES = 16;
     private static final int DEFAULT_VERIFICATION_BYTES = 32;
 
     static {
@@ -29,7 +29,7 @@ public class StringUtils {
         return generateOpaqueToken(DEFAULT_OPAQUE_BYTES);
     }
 
-    public String generateVerificationCode() {
+    public String generateSecretString() {
         return generateOpaqueToken(DEFAULT_VERIFICATION_BYTES);
     }
 

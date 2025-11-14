@@ -6,4 +6,9 @@ public interface EmailService {
 
     void sendVerificationEmail(User user, String verificationCode);
 
+    void sendResetPasswordEmail(User user, String resetPasswordCode);
+
+    void sendPasswordResetConfirmationEmail(User user);
+
+    void sendPasswordChangeEmail(User user);
 }

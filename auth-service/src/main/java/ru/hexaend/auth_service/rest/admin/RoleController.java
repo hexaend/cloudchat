@@ -13,14 +13,14 @@ import ru.hexaend.auth_service.service.interfaces.RoleService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/roles")
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 public class RoleController {
 
     private final RoleService roleService;
     private final RoleMapper roleMapper;
 
-    @GetMapping()
+    @GetMapping("/roles")
     public ResponseEntity<List<RoleResponse>> getAllRoles(
             @PageableDefault(size = 20) Pageable pageable
     ) {
@@ -29,21 +29,21 @@ public class RoleController {
         return ResponseEntity.ok(roleResponses);
     }
 
-    @PostMapping
+    @PostMapping("/roles")
     public ResponseEntity<RoleResponse> createRole(String roleName) {
         Role role = roleService.createRole(roleName);
         RoleResponse roleResponse = roleMapper.toResponse(role);
         return ResponseEntity.ok(roleResponse);
     }
 
-    @PutMapping
+    @PutMapping("/roles")
     public ResponseEntity<RoleResponse> updateRole(Long roleId, String roleName) {
         Role role = roleService.updateRole(roleId, roleName);
         RoleResponse roleResponse = roleMapper.toResponse(role);
         return ResponseEntity.ok(roleResponse);
     }
 
-    @GetMapping("/{roleId}")
+    @GetMapping("/roles/{roleId}")
     public ResponseEntity<RoleResponse> getRoleById(@PathVariable Long roleId) {
         Role role = roleService.getRoleById(roleId);
         RoleResponse roleResponse = roleMapper.toResponse(role);

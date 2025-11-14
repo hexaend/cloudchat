@@ -9,7 +9,7 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.hexaend.auth_service.config.RsaPropertiesConfig;
+import ru.hexaend.auth_service.security.RsaPropertiesConfig;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.JwtException;
 import ru.hexaend.auth_service.service.interfaces.JwtService;

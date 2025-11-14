@@ -16,6 +16,7 @@ spring:
                 connection:
                     driver_class: org.postgresql.Driver
                     dialect: org.hibernate.dialect.PostgreSQLDialect
+                highlight_sql: true
     mail:
         host: localhost
         port: 1025

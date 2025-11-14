@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.hexaend.auth_service.config.RsaPropertiesConfig;
+import ru.hexaend.auth_service.security.RsaPropertiesConfig;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.JwtException;
 

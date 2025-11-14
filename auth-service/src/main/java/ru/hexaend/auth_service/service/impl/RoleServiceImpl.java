@@ -33,7 +33,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public Role updateRole(Long roleId, String roleName) {
-
         Role role = roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role not found"));
 
         role.setName(roleName.toUpperCase());

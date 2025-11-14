@@ -7,4 +7,6 @@ public interface OpaqueService {
     String createOpaqueToken(User user);
 
     User getUserFromToken(String token);
+
+    void invalidateAllTokensForUser(User user);
 }

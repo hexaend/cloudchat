@@ -1,12 +1,11 @@
 spring:
-  application:
-    name: test-service
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # Получение публичного ключа от Auth Service
-          issuer-uri: http://localhost:8081
+    application:
+        name: test-service
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8081
 
 server:
-  port: 8082
+    port: 8082

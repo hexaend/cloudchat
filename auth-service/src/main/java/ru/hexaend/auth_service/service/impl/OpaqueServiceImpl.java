@@ -1,6 +1,7 @@
 package ru.hexaend.auth_service.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hexaend.auth_service.entity.RefreshToken;
@@ -44,5 +45,14 @@ public class OpaqueServiceImpl implements OpaqueService {
         return user;
     }
 
+    @Override
+    public void invalidateAllTokensForUser(User user) {
+        refreshTokenRepository.deleteAllByUser(user);
+    }
 
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void deleteExpiredTokens() {
+        refreshTokenRepository.deleteAllByExpiryDateBefore(Instant.now());
+    }
 }
