@@ -1,17 +1,34 @@
 version: '3.8'
 
 services:
-  main_database_postgres:
-    image: postgres:latest
-    container_name: main_database_postgres
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: postgres_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - main_postgres_data:/var/lib/postgresql
+    main_database_postgres:
+        image: postgres:latest
+        container_name: main_database_postgres
+        environment:
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: postgres_db
+        ports:
+            - "5432:5432"
+        volumes:
+            - main_postgres_data:/var/lib/postgresql
+
+    auth-service:
+        build:
+            context: .
+            dockerfile: auth-service/Dockerfile
+        image: auth-service:latest
+        container_name: auth-service
+        ports:
+            - "8081:8081"
+        environment:
+            - SPRING_DATASOURCE_URL=jdbc:postgresql://main_database_postgres:5432/postgres_db
+            - SPRING_DATASOURCE_USERNAME=user
+            - SPRING_DATASOURCE_PASSWORD=password
+            - SERVER_PORT=8081
+            - SERVER_ADDRESS=0.0.0.0
+        depends_on:
+            - main_database_postgres
 
 volumes:
     main_postgres_data:
