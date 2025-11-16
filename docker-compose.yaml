@@ -27,6 +27,7 @@ services:
             - SPRING_DATASOURCE_PASSWORD=password
             - SERVER_PORT=8081
             - SERVER_ADDRESS=0.0.0.0
+            - SPRING_MAIL_HOST=mailpit
         depends_on:
             - main_database_postgres
 

@@ -1,17 +1,20 @@
-# TODO: add cache for gradle dependencies
-
 FROM gradle:8.14.2-jdk24 AS build
 
 WORKDIR /home/gradle/project
 
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    gradle --no-daemon dependencies --refresh-dependencies || true
 
 COPY auth-service/build.gradle.kts ./auth-service/build.gradle.kts
 
 COPY auth-service/src ./auth-service/src
 
-RUN gradle --no-daemon clean build -x test auth-service:build
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    gradle --no-daemon build -x test auth-service:build
 
 FROM eclipse-temurin:24-jre
 
