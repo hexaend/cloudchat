@@ -9,14 +9,13 @@ spring:
     jpa:
         hibernate:
             ddl-auto: update
-        show-sql: false
+        show-sql: true
         properties:
             hibernate:
-                format_sql: true
                 connection:
                     driver_class: org.postgresql.Driver
                     dialect: org.hibernate.dialect.PostgreSQLDialect
-                highlight_sql: true
+                highlight_sql: false
     mail:
         host: localhost
         port: 1025
@@ -63,11 +62,25 @@ management:
         sampling:
             probability: 1.0
 
+    observations:
+        annotations:
+            enabled: true
+
+
     otlp:
         tracing:
-            endpoint: http://alloy:4318
+            endpoint: http://alloy:4320/
+
 
 logging:
     config: classpath:logback-spring.xml
-
+otel:
+    exporter:
+        otlp:
+            protocol: http/protobuf
+            endpoint: http://alloy:4320/
+    logs:
+        exporter: none
+    metrics:
+        exporter: none
 #debug: true

@@ -1,5 +1,6 @@
 package ru.hexaend.auth_service.service.impl;
 
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,6 +46,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     @Transactional
+    @Observed(name="user.register", contextualName = "register-user")
     public VerifyStatusResponse register(RegisterRequest request) {
         if (userRepository.existsByEmailAndEnabledIsTrue(request.email())) {
             throw new EmailAlreadyInUseException("Email is already in use");
@@ -55,12 +57,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userMapper.toEntity(request);
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         userRepository.save(user);
-
         return verifyEmail(user);
     }
 
     @Transactional
     @Override
+    @Observed(name = "user.verify-email", contextualName = "verify-email")
     public VerifyStatusResponse verifyEmail(User user) {
         String token = generateVerificationToken(user);
         // TODO: use async email sending

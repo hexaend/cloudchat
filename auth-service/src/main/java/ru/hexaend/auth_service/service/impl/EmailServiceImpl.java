@@ -1,5 +1,6 @@
 package ru.hexaend.auth_service.service.impl;
 
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -20,6 +21,7 @@ public class EmailServiceImpl implements EmailService {
     private String address;
 
     @Override
+    @Observed(name = "email.sendVerification", contextualName = "send-verification-email")
     public void sendVerificationEmail(User user, String verificationCode) {
         // TODO: customize email content from configuration/template
         SimpleMailMessage msg = new SimpleMailMessage();

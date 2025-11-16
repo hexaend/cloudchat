@@ -18,6 +18,12 @@ tasks.named<BootBuildImage>("bootBuildImage") {
     imageName.set("hexaend/auth-service:latest")
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.21.0")
+    }
+}
+
 dependencies {
 
     // Web Dependencies
@@ -39,6 +45,10 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation("io.micrometer:micrometer-observation")
+    implementation("io.micrometer:micrometer-tracing")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+
 
     // Other
     implementation("org.mapstruct:mapstruct:1.6.3")

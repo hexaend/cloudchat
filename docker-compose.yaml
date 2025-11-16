@@ -20,7 +20,10 @@ services:
             - observability-net
 
     auth-service:
-        image: hexaend/auth-service:latest
+        build:
+            context: .
+            dockerfile: ./auth-service/Dockerfile
+#        image: hexaend/auth-service:latest
         container_name: app-auth-service
         ports:
             - "8081:8081"
@@ -31,7 +34,7 @@ services:
             - SERVER_PORT=8081
             - SERVER_ADDRESS=0.0.0.0
             - SPRING_MAIL_HOST=host.docker.internal
-            - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://alloy:4318/v1/traces
+            - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://alloy:4320/v1/traces
         depends_on:
             alloy:
                 condition: service_started
@@ -98,8 +101,8 @@ services:
         user: root
         ports:
             - "9080:9080"
-            - "4317:4317"
-            - "4318:4318"
+            - "4319:4317" # OTLP gRPC
+            - "4320:4318" # OTLP HTTP
         volumes:
             - ./infrastructure/alloy/config.alloy:/etc/alloy/config.alloy:ro
             - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -130,6 +133,8 @@ services:
             - tempo_data:/var/tempo
         ports:
             - "3200:3200"
+            - "4317:4317"
+            - "4318:4318"
         networks:
             - observability-net
 

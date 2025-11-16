@@ -57,7 +57,7 @@ otelcol.receiver.otlp "default" {
     endpoint = "0.0.0.0:4317"
   }
   http {
-    endpoint = "0.0.0.0:4318"
+    endpoint = "0.0.0.0:4320"
   }
   output {
     traces = [otelcol.exporter.otlp.tempo.input]
@@ -67,7 +67,7 @@ otelcol.receiver.otlp "default" {
 
 otelcol.exporter.otlp "tempo" {
   client {
-    endpoint = "tempo:3200"
+    endpoint = "tempo:4317"
     tls {
       insecure = true
     }
