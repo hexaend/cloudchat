@@ -9,7 +9,7 @@ spring:
     jpa:
         hibernate:
             ddl-auto: update
-        show-sql: true
+        show-sql: false
         properties:
             hibernate:
                 format_sql: true
@@ -37,5 +37,37 @@ server:
 rsa:
     private-key: classpath:/keys/private.pem
     public-key: classpath:/keys/public.pem
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    metrics:
+        export:
+            prometheus:
+                enabled: true
+        tags:
+            application: auth-service
+        distribution:
+            percentiles-histogram:
+                http:
+                    server:
+                        requests: 'true'
+
+    endpoint:
+        prometheus:
+            enabled: true
+
+    tracing:
+        sampling:
+            probability: 1.0
+
+    otlp:
+        tracing:
+            endpoint: http://alloy:4318
+
+logging:
+    config: classpath:logback-spring.xml
 
 #debug: true

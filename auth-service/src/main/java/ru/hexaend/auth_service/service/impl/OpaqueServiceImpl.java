@@ -41,7 +41,6 @@ public class OpaqueServiceImpl implements OpaqueService {
                 .orElseThrow(() -> new OpaqueTokenNotFoundException("Refresh token not found"))
                 .getUser();
         refreshTokenRepository.deleteByToken(token);
-
         return user;
     }
 

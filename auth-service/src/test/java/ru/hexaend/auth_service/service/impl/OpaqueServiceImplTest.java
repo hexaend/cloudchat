@@ -117,4 +117,19 @@ class OpaqueServiceImplTest {
         assertThrows(OpaqueTokenNotFoundException.class, () -> opaqueService.getUserFromToken(token));
         verify(refreshTokenRepository, never()).deleteByToken(anyString());
     }
+
+    @DisplayName("invalidateAllTokensForUser calls repository to delete all user's tokens")
+    @Test
+    void invalidateAllTokensForUserCallsRepository() {
+        User user = new User();
+        opaqueService.invalidateAllTokensForUser(user);
+        verify(refreshTokenRepository).deleteAllByUser(user);
+    }
+
+    @DisplayName("deleteExpiredTokens calls repository with current time")
+    @Test
+    void deleteExpiredTokensCallsRepository() {
+        opaqueService.deleteExpiredTokens();
+        verify(refreshTokenRepository).deleteAllByExpiryDateBefore(any());
+    }
 }

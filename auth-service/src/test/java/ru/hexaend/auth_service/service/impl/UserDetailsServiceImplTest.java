@@ -6,15 +6,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.hexaend.auth_service.dto.request.RegisterRequest;
+import ru.hexaend.auth_service.dto.request.ChangePasswordRequest;
+import ru.hexaend.auth_service.dto.request.ResetPasswordRequest;
 import ru.hexaend.auth_service.dto.response.UserResponse;
 import ru.hexaend.auth_service.dto.response.VerifyStatusResponse;
+import ru.hexaend.auth_service.dto.response.ResetPasswordResponse;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.EmailAlreadyInUseException;
 import ru.hexaend.auth_service.exception.UsernameAlreadyInUseException;
 import ru.hexaend.auth_service.mapper.UserMapper;
 import ru.hexaend.auth_service.repository.UserRepository;
+import ru.hexaend.auth_service.service.interfaces.EmailService;
+import ru.hexaend.auth_service.repository.CodeRepository;
+import ru.hexaend.auth_service.service.interfaces.OpaqueService;
 
 import java.util.Optional;
 
@@ -32,6 +41,15 @@ class UserDetailsServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private CodeRepository codeRepository;
+
+    @Mock
+    private OpaqueService opaqueService;
 
     @InjectMocks
     private UserDetailsServiceImpl userDetailsService;
@@ -83,21 +101,21 @@ class UserDetailsServiceImplTest {
         when(userRepository.existsByUsernameAndEnabledIsTrue(username)).thenReturn(false);
         when(userMapper.toEntity(request)).thenReturn(mappedUser);
         when(passwordEncoder.encode(password)).thenReturn("encoded");
-        when(userMapper.toDto(mappedUser)).thenReturn(new UserResponse(1L, username, email, "Alex", "Ivanov", false));
+        // verification email will be sent; CodeRepository is mocked so no NPE
 
         // then
-//        VerifyStatusResponse response = userDetailsService.register(request);
+        VerifyStatusResponse response = userDetailsService.register(request);
 
-//        assertNotNull(response);
-//        assertEquals(username, response.username());
-//        assertEquals(email, response.email());
+        assertNotNull(response);
+        assertEquals("VERIFICATION_EMAIL_SENT", response.status());
+        assertTrue(response.message().contains("Verification email sent to"));
 
-//        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
-//        verify(userRepository).existsByUsernameAndEnabledIsTrue(username);
-//        verify(userMapper).toEntity(request);
-//        verify(passwordEncoder).encode(password);
-//        verify(userRepository).save(mappedUser);
-//        verify(userMapper).toDto(mappedUser);
+        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
+        verify(userRepository).existsByUsernameAndEnabledIsTrue(username);
+        verify(userMapper).toEntity(request);
+        verify(passwordEncoder).encode(password);
+        verify(userRepository).save(mappedUser);
+        verify(emailService).sendVerificationEmail(eq(mappedUser), anyString());
     }
 
     @DisplayName("register throws when email already in use")
@@ -134,5 +152,138 @@ class UserDetailsServiceImplTest {
         verify(userRepository).existsByEmailAndEnabledIsTrue(email);
         verify(userRepository).existsByUsernameAndEnabledIsTrue(username);
         verify(userRepository, never()).save(any());
+    }
+
+    @DisplayName("getCurrentUser returns user from security context")
+    @Test
+    void getCurrentUserReturnsUser() {
+        // given
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn(username);
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(ctx);
+
+        User user = mock(User.class);
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+        // when
+        User result = userDetailsService.getCurrentUser();
+
+        // then
+        assertEquals(user, result);
+        verify(userRepository).findByUsername(username);
+    }
+
+    @DisplayName("getUserByUsername throws when not found")
+    @Test
+    void getUserByUsernameThrowsWhenNotFound() {
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> userDetailsService.getUserByUsername(username));
+        verify(userRepository).findByUsername(username);
+    }
+
+    @DisplayName("setEmailVerified sets flag and saves user")
+    @Test
+    void setEmailVerifiedSetsFlag() {
+        User user = new User();
+        user.setEmailVerified(false);
+
+        userDetailsService.setEmailVerified(user);
+
+        assertTrue(user.isEmailVerified());
+        verify(userRepository).save(user);
+    }
+
+    @DisplayName("resetPassword sends reset email and returns response")
+    @Test
+    void resetPasswordSendsEmail() {
+        // given
+        ResetPasswordRequest request = new ResetPasswordRequest(email);
+        User user = new User();
+        user.setEmail(email);
+
+        // when
+        when(userRepository.getByEmail(email)).thenReturn(Optional.of(user));
+        when(codeRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // then
+        ResetPasswordResponse response = userDetailsService.resetPassword(request);
+
+        assertNotNull(response);
+        assertEquals("RESET_EMAIL_SENT", response.status());
+        assertTrue(response.message().contains("Reset password email sent to"));
+
+        verify(userRepository).getByEmail(email);
+        verify(emailService).sendResetPasswordEmail(eq(user), anyString());
+        verify(codeRepository).save(any());
+    }
+
+    @DisplayName("resetPassword throws when user not found")
+    @Test
+    void resetPasswordThrowsWhenUserNotFound() {
+        ResetPasswordRequest request = new ResetPasswordRequest(email);
+        when(userRepository.getByEmail(email)).thenReturn(Optional.empty());
+
+        assertThrows(java.util.NoSuchElementException.class, () -> userDetailsService.resetPassword(request));
+        verify(userRepository).getByEmail(email);
+        verify(emailService, never()).sendResetPasswordEmail(any(), anyString());
+    }
+
+    @DisplayName("changePassword updates password when old password matches and logs out sessions")
+    @Test
+    void changePasswordUpdatesAndLogsOut() {
+        // given
+        ChangePasswordRequest request = new ChangePasswordRequest("oldPass", "newPass");
+        User user = mock(User.class);
+
+        // setup security context
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn(username);
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(ctx);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(user.getPassword(), request.oldPassword())).thenReturn(true);
+        when(passwordEncoder.encode(request.newPassword())).thenReturn("encodedNew");
+
+        // when
+        userDetailsService.changePassword(request);
+
+        // then
+        verify(userRepository).save(user);
+        verify(emailService).sendPasswordChangeEmail(user);
+        verify(opaqueService).invalidateAllTokensForUser(user);
+    }
+
+    @DisplayName("changePassword throws when old password incorrect")
+    @Test
+    void changePasswordThrowsWhenOldPasswordIncorrect() {
+        ChangePasswordRequest request = new ChangePasswordRequest("wrongOld", "newPass");
+        User user = mock(User.class);
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn(username);
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(ctx);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(user.getPassword(), request.oldPassword())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class, () -> userDetailsService.changePassword(request));
+
+        verify(userRepository, never()).save(any());
+        verify(emailService, never()).sendPasswordChangeEmail(any());
+    }
+
+    @DisplayName("logoutAllSessions calls opaque service to invalidate tokens")
+    @Test
+    void logoutAllSessionsCallsOpaque() {
+        User user = new User();
+        userDetailsService.logoutAllSessions(user);
+        verify(opaqueService).invalidateAllTokensForUser(user);
     }
 }

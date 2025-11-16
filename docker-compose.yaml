@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+    observability-net:
+        driver: bridge
+
 services:
     main_database_postgres:
         image: postgres:latest
@@ -12,13 +16,12 @@ services:
             - "5432:5432"
         volumes:
             - main_postgres_data:/var/lib/postgresql
+        networks:
+            - observability-net
 
     auth-service:
-        build:
-            context: .
-            dockerfile: auth-service/Dockerfile
-        image: auth-service:latest
-        container_name: auth-service
+        image: hexaend/auth-service:latest
+        container_name: app-auth-service
         ports:
             - "8081:8081"
         environment:
@@ -27,9 +30,113 @@ services:
             - SPRING_DATASOURCE_PASSWORD=password
             - SERVER_PORT=8081
             - SERVER_ADDRESS=0.0.0.0
-            - SPRING_MAIL_HOST=mailpit
+            - SPRING_MAIL_HOST=host.docker.internal
+            - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://alloy:4318/v1/traces
         depends_on:
-            - main_database_postgres
+            alloy:
+                condition: service_started
+            main_database_postgres:
+                condition: service_started
+        networks:
+            - observability-net
+        restart: on-failure
+
+    prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./infrastructure/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+        networks:
+            - observability-net
+        healthcheck:
+            test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9090/-/ready" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    grafana:
+        image: grafana/grafana-oss:latest
+        container_name: grafana
+        ports:
+            - "3000:3000"
+        environment:
+            - GF_SECURITY_ADMIN_USER=admin
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+        depends_on:
+            prometheus:
+                condition: service_healthy
+        volumes:
+            - grafana-storage:/var/lib/grafana
+        networks:
+            - observability-net
+        healthcheck:
+            test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    loki:
+        image: grafana/loki:latest
+        container_name: loki
+        ports:
+            - "3100:3100"
+        command: -config.file=/etc/loki/loki-config.yaml
+        user: "root"
+        volumes:
+            - ./infrastructure/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+            - loki_chunks:/tmp/loki/chunks
+            - loki_index:/tmp/loki/index
+            - loki_rules:/tmp/loki/rules
+        networks:
+            - observability-net
+
+    alloy:
+        image: grafana/alloy:latest
+        container_name: alloy
+        user: root
+        ports:
+            - "9080:9080"
+            - "4317:4317"
+            - "4318:4318"
+        volumes:
+            - ./infrastructure/alloy/config.alloy:/etc/alloy/config.alloy:ro
+            - /var/lib/docker/containers:/var/lib/docker/containers:ro
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /var/log:/var/log:ro
+        environment:
+            GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
+        command:
+            - run
+            - --server.http.listen-addr=0.0.0.0:9080
+            - --storage.path=/var/lib/alloy/data
+            - /etc/alloy/config.alloy
+        networks:
+            - observability-net
+        healthcheck:
+            test: ["CMD", "wget", "--spider", "-q", "http://localhost:9080/-/ready"]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+
+    tempo:
+        image: grafana/tempo:latest
+        container_name: tempo
+        command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+        volumes:
+            - ./infrastructure/tempo/tempo.yaml:/etc/tempo/tempo.yaml
+            - tempo_data:/var/tempo
+        ports:
+            - "3200:3200"
+        networks:
+            - observability-net
 
 volumes:
     main_postgres_data:
+    grafana-storage:
+    loki_chunks:
+    loki_index:
+    loki_rules:
+    tempo_data:

@@ -15,6 +15,7 @@ import ru.hexaend.auth_service.exception.JwtException;
 import ru.hexaend.auth_service.service.interfaces.JwtService;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -37,6 +38,9 @@ public class JwtServiceImpl implements JwtService {
         SignedJWT signedJWT = null;
         try {
             signedJWT = SignedJWT.parse(jwtToken);
+            if (signedJWT.getJWTClaimsSet().getExpirationTime().before(Date.from(Instant.now()))) {
+                throw new JwtException("JWT token is expired");
+            }
             return signedJWT.getJWTClaimsSet().getSubject();
         } catch (ParseException e) {
             throw new JwtException("Failed to parse JWT token", e);

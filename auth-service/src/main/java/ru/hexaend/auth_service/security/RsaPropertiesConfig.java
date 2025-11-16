@@ -11,7 +11,6 @@ import java.security.interfaces.RSAPublicKey;
 @Configuration
 @ConfigurationProperties(prefix = "rsa")
 @Data
-@Slf4j
 public class RsaPropertiesConfig {
     private RSAPrivateKey privateKey;
     private RSAPublicKey publicKey;

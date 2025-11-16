@@ -14,7 +14,9 @@ import ru.hexaend.auth_service.dto.response.AuthResponse;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.InvalidPasswordException;
 import ru.hexaend.auth_service.exception.LimitRefreshTokenException;
+import ru.hexaend.auth_service.repository.CodeRepository;
 import ru.hexaend.auth_service.repository.UserRepository;
+import ru.hexaend.auth_service.service.interfaces.EmailService;
 import ru.hexaend.auth_service.service.interfaces.JwtService;
 import ru.hexaend.auth_service.service.interfaces.OpaqueService;
 import ru.hexaend.auth_service.service.interfaces.UserDetailsService;
@@ -29,9 +31,6 @@ class AuthServiceImplTest {
     private UserRepository userRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
     private JwtService jwtService;
 
     @Mock
@@ -39,6 +38,12 @@ class AuthServiceImplTest {
 
     @Mock
     private OpaqueService opaqueService;
+
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private CodeRepository codeRepository;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -62,12 +67,10 @@ class AuthServiceImplTest {
 
         // when
         User user = mock(User.class);
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(user);
+        when(userDetailsService.loadUserByUsername(username)).thenReturn(user);
         when(user.getPasswordHash()).thenReturn(encodedPassword);
-        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
         when(jwtService.generateAccessToken(user)).thenReturn(jwtToken);
         when(opaqueService.createOpaqueToken(user)).thenReturn(opaqueToken);
-        when(user.getRefreshTokenCount()).thenReturn(0);
 
         // then
         AuthResponse response = authService.login(request);
@@ -77,8 +80,7 @@ class AuthServiceImplTest {
         assertEquals(jwtToken, response.accessToken());
         assertEquals(opaqueToken, response.refreshToken());
 
-        verify(user).setRefreshTokenCount(1);
-        verify(userRepository).save(user);
+        verify(userDetailsService).loadUserByUsername(request.username());
         verify(jwtService).generateAccessToken(user);
         verify(opaqueService).createOpaqueToken(user);
     }
@@ -93,7 +95,6 @@ class AuthServiceImplTest {
         User user = mock(User.class);
         when(userDetailsService.loadUserByUsername(anyString())).thenReturn(user);
         when(user.getPasswordHash()).thenReturn(encodedPassword);
-        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false);
 
         // then
         InvalidPasswordException exception = assertThrows(InvalidPasswordException.class, () -> {
@@ -116,7 +117,6 @@ class AuthServiceImplTest {
         User user = mock(User.class);
         when(opaqueService.getUserFromToken(opaqueToken)).thenReturn(user);
         when(jwtService.generateAccessToken(user)).thenReturn(jwtToken);
-        when(user.getRefreshTokenCount()).thenReturn(1);
 
         // then
         AuthResponse response = authService.refreshAccessToken(request);
@@ -125,29 +125,64 @@ class AuthServiceImplTest {
         assertEquals(jwtToken, response.accessToken());
         assertNull(response.refreshToken());
 
-        verify(user).setRefreshTokenCount(2);
-        verify(userRepository).save(user);
+        verify(opaqueService).getUserFromToken(request.token());
         verify(jwtService).generateAccessToken(user);
+        verify(opaqueService).createOpaqueToken(user);
     }
 
+    @DisplayName("verifyToken sets email verified and deletes code")
     @Test
-    @DisplayName("Refresh access token with invalid opaque token throws exception")
-    void refreshAccessTokenWithInvalidOpaqueTokenThrowsException() {
+    void verifyTokenSetsEmailVerifiedAndDeletesCode() {
         // given
-        RefreshTokenRequest request = new RefreshTokenRequest(opaqueToken);
+        String code = "abc123";
+        User user = mock(User.class);
+        var verificationCode = mock(ru.hexaend.auth_service.entity.Code.class);
+        when(verificationCode.getUser()).thenReturn(user);
+        when(codeRepository.findByCodeAndType(eq(code), any())).thenReturn(java.util.Optional.of(verificationCode));
 
         // when
-        User user = mock(User.class);
-        when(user.getRefreshTokenCount()).thenReturn(10);
-        when(opaqueService.getUserFromToken(opaqueToken)).thenReturn(user);
+        authService.verifyToken(code);
 
         // then
-        LimitRefreshTokenException exception = assertThrows(LimitRefreshTokenException.class, () -> {
-            authService.refreshAccessToken(request);
-        });
+        verify(codeRepository).findByCodeAndType(eq(code), any());
+        verify(userDetailsService).setEmailVerified(user);
+        verify(codeRepository).delete(verificationCode);
+    }
 
-        assertEquals("Limit of refresh tokens reached", exception.getMessage());
-        verify(userRepository, never()).save(any());
-        verify(jwtService, never()).generateAccessToken(any());
+    @DisplayName("verifyToken throws when code not found")
+    @Test
+    void verifyTokenThrowsWhenCodeNotFound() {
+        when(codeRepository.findByCodeAndType(anyString(), any())).thenReturn(java.util.Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> authService.verifyToken("missing"));
+    }
+
+    @DisplayName("resetPassword applies new password and cleans up code")
+    @Test
+    void resetPasswordAppliesNewPasswordAndCleansUp() {
+        // given
+        String code = "reset-code";
+        User user = mock(User.class);
+        var verificationCode = mock(ru.hexaend.auth_service.entity.Code.class);
+        when(verificationCode.getUser()).thenReturn(user);
+        when(codeRepository.findByCodeAndType(eq(code), any())).thenReturn(java.util.Optional.of(verificationCode));
+        ru.hexaend.auth_service.dto.request.NewPasswordRequest req = new ru.hexaend.auth_service.dto.request.NewPasswordRequest("new-pass");
+
+        // when
+        authService.resetPassword(code, req);
+
+        // then
+        verify(codeRepository).findByCodeAndType(eq(code), any());
+        verify(codeRepository).delete(verificationCode);
+        verify(emailService).sendPasswordResetConfirmationEmail(user);
+        verify(userDetailsService).logoutAllSessions(user);
+    }
+
+    @DisplayName("resetPassword throws when code not found")
+    @Test
+    void resetPasswordThrowsWhenCodeNotFound() {
+        when(codeRepository.findByCodeAndType(anyString(), any())).thenReturn(java.util.Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> authService.resetPassword("missing", new ru.hexaend.auth_service.dto.request.NewPasswordRequest("x")));
     }
 }

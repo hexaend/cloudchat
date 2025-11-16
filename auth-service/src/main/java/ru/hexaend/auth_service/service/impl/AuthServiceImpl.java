@@ -40,9 +40,6 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse refreshAccessToken(RefreshTokenRequest refreshToken) {
         User user = opaqueService.getUserFromToken(refreshToken.token());
-        if (user.getRefreshTokenCount() >= 5) {
-            throw new LimitRefreshTokenException();
-        }
         return generateTokens(user);
     }
 
@@ -81,7 +78,6 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponse generateTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = opaqueService.createOpaqueToken(user);
-        user.setRefreshTokenCount(user.getRefreshTokenCount() + 1);
         return new AuthResponse("Bearer", accessToken, refreshToken);
     }
 }

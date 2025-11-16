@@ -116,7 +116,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional
     @Override
     public void logoutAllSessions(User user) {
-        user.setRefreshTokenCount(0);
         opaqueService.invalidateAllTokensForUser(user);
         // TODO: logout from this session by cookie/other
     }

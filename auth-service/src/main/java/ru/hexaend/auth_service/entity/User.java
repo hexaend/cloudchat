@@ -57,9 +57,6 @@ public class User implements UserDetails {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Column(name="refresh_token_count", nullable = false)
-    private int refreshTokenCount = 0;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",
