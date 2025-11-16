@@ -2,7 +2,7 @@ name: ci-cd.yaml
 on:
     push:
         branches:
-            - main
+            - master
 
 jobs:
     test-build:
