@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.hexaend.auth_service.dto.request.AuthRequest;
+import ru.hexaend.auth_service.dto.request.NewPasswordRequest;
 import ru.hexaend.auth_service.dto.request.RefreshTokenRequest;
 import ru.hexaend.auth_service.dto.response.AuthResponse;
 import ru.hexaend.auth_service.entity.User;
@@ -48,6 +49,9 @@ class AuthServiceImplTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
     }
@@ -71,6 +75,7 @@ class AuthServiceImplTest {
         when(user.getPasswordHash()).thenReturn(encodedPassword);
         when(jwtService.generateAccessToken(user)).thenReturn(jwtToken);
         when(opaqueService.createOpaqueToken(user)).thenReturn(opaqueToken);
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
 
         // then
         AuthResponse response = authService.login(request);
@@ -166,7 +171,9 @@ class AuthServiceImplTest {
         var verificationCode = mock(ru.hexaend.auth_service.entity.Code.class);
         when(verificationCode.getUser()).thenReturn(user);
         when(codeRepository.findByCodeAndType(eq(code), any())).thenReturn(java.util.Optional.of(verificationCode));
-        ru.hexaend.auth_service.dto.request.NewPasswordRequest req = new ru.hexaend.auth_service.dto.request.NewPasswordRequest("new-pass");
+        when(passwordEncoder.encode("new-pass")).thenReturn("encoded-new-pass");
+        NewPasswordRequest req = new NewPasswordRequest("new-pass");
+
 
         // when
         authService.resetPassword(code, req);
@@ -183,6 +190,6 @@ class AuthServiceImplTest {
     void resetPasswordThrowsWhenCodeNotFound() {
         when(codeRepository.findByCodeAndType(anyString(), any())).thenReturn(java.util.Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> authService.resetPassword("missing", new ru.hexaend.auth_service.dto.request.NewPasswordRequest("x")));
+        assertThrows(RuntimeException.class, () -> authService.resetPassword("missing", new NewPasswordRequest("x")));
     }
 }

@@ -1,10 +1,10 @@
 package ru.hexaend.auth_service.service.impl;
 
-import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.service.interfaces.EmailService;
@@ -21,7 +21,7 @@ public class EmailServiceImpl implements EmailService {
     private String address;
 
     @Override
-    @Observed(name = "email.sendVerification", contextualName = "send-verification-email")
+    @Async
     public void sendVerificationEmail(User user, String verificationCode) {
         // TODO: customize email content from configuration/template
         SimpleMailMessage msg = new SimpleMailMessage();
@@ -33,6 +33,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendResetPasswordEmail(User user, String resetPasswordCode) {
         // TODO: customize email content from configuration/template
         SimpleMailMessage msg = new SimpleMailMessage();
@@ -44,6 +45,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendPasswordResetConfirmationEmail(User user) {
         // TODO: customize email content from configuration/template
         SimpleMailMessage msg = new SimpleMailMessage();
@@ -54,6 +56,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @Async
     public void sendPasswordChangeEmail(User user) {
         // TODO: customize email content from configuration/template
         SimpleMailMessage msg = new SimpleMailMessage();

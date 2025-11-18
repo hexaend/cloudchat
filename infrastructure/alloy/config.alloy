@@ -57,7 +57,7 @@ otelcol.receiver.otlp "default" {
     endpoint = "0.0.0.0:4317"
   }
   http {
-    endpoint = "0.0.0.0:4320"
+    endpoint = "0.0.0.0:4318"
   }
   output {
     traces = [otelcol.exporter.otlp.tempo.input]

@@ -1,4 +1,3 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -7,7 +6,6 @@ group = "ru.hexaend.auth_service"
 
 plugins {
     id("org.springframework.boot")
-    id("org.graalvm.buildtools.native") version "0.10.6"
 }
 
 tasks.getByName<BootJar>("bootJar") {
@@ -16,6 +14,8 @@ tasks.getByName<BootJar>("bootJar") {
 
 tasks.named<BootBuildImage>("bootBuildImage") {
     imageName.set("hexaend/auth-service:latest")
+//    builder.set("paketobuildpacks/builder-jammy-full")
+//    environment.put("BP_NATIVE_IMAGE", "true") // если хотите native image
 }
 
 dependencyManagement {
@@ -59,4 +59,5 @@ dependencies {
     testImplementation("org.junit.platform:junit-platform-suite-engine")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("com.h2database:h2")
 }

@@ -1,11 +1,10 @@
 package ru.hexaend.auth_service;
 
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.Suite;
 
 @Suite
-@SelectPackages("ru.hexaend.auth_service.service")
-public class TestServiceAll {
+@SelectPackages("ru.hexaend.auth_service.repository")
+public class TestRepositoryAll {
 }

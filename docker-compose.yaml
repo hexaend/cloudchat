@@ -20,10 +20,10 @@ services:
             - observability-net
 
     auth-service:
-        build:
-            context: .
-            dockerfile: ./auth-service/Dockerfile
-#        image: hexaend/auth-service:latest
+#        build:
+#            context: .
+#            dockerfile: ./auth-service/Dockerfile
+        image: hexaend/auth-service:latest
         container_name: app-auth-service
         ports:
             - "8081:8081"
@@ -33,8 +33,8 @@ services:
             - SPRING_DATASOURCE_PASSWORD=password
             - SERVER_PORT=8081
             - SERVER_ADDRESS=0.0.0.0
-            - SPRING_MAIL_HOST=host.docker.internal
-            - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://alloy:4320/v1/traces
+            - SPRING_MAIL_HOST=mailpit
+            - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4319
         depends_on:
             alloy:
                 condition: service_started
@@ -42,7 +42,6 @@ services:
                 condition: service_started
         networks:
             - observability-net
-        restart: on-failure
 
     prometheus:
         image: prom/prometheus:latest
@@ -138,6 +137,21 @@ services:
         networks:
             - observability-net
 
+    mailpit:
+        image: axllent/mailpit
+        container_name: mailpit
+        volumes:
+            - ./data:/data
+        ports:
+            - 8025:8025
+            - 1025:1025
+        networks:
+            - observability-net
+        environment:
+            MP_MAX_MESSAGES: 5000
+            MP_DATABASE: /data/mailpit.db
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1
 volumes:
     main_postgres_data:
     grafana-storage:
