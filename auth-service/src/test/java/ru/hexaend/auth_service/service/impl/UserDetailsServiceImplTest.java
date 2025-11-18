@@ -10,19 +10,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.hexaend.auth_service.dto.request.RegisterRequest;
 import ru.hexaend.auth_service.dto.request.ChangePasswordRequest;
+import ru.hexaend.auth_service.dto.request.RegisterRequest;
 import ru.hexaend.auth_service.dto.request.ResetPasswordRequest;
-import ru.hexaend.auth_service.dto.response.UserResponse;
-import ru.hexaend.auth_service.dto.response.VerifyStatusResponse;
 import ru.hexaend.auth_service.dto.response.ResetPasswordResponse;
+import ru.hexaend.auth_service.dto.response.VerifyStatusResponse;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.EmailAlreadyInUseException;
 import ru.hexaend.auth_service.exception.UsernameAlreadyInUseException;
 import ru.hexaend.auth_service.mapper.UserMapper;
+import ru.hexaend.auth_service.repository.CodeRepository;
 import ru.hexaend.auth_service.repository.UserRepository;
 import ru.hexaend.auth_service.service.interfaces.EmailService;
-import ru.hexaend.auth_service.repository.CodeRepository;
 import ru.hexaend.auth_service.service.interfaces.OpaqueService;
 
 import java.util.Optional;
@@ -33,30 +32,23 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserDetailsServiceImplTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private UserMapper userMapper;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private EmailService emailService;
-
-    @Mock
-    private CodeRepository codeRepository;
-
-    @Mock
-    private OpaqueService opaqueService;
-
-    @InjectMocks
-    private UserDetailsServiceImpl userDetailsService;
-
     private final String username = "alexey";
     private final String password = "securePassword!";
     private final String email = "alexey@example.com";
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private UserMapper userMapper;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private EmailService emailService;
+    @Mock
+    private CodeRepository codeRepository;
+    @Mock
+    private OpaqueService opaqueService;
+    @InjectMocks
+    private UserDetailsServiceImpl userDetailsService;
 
     @DisplayName("loadUserByUsername returns user when found and enabled")
     @Test
@@ -246,7 +238,7 @@ class UserDetailsServiceImplTest {
         SecurityContextHolder.setContext(ctx);
 
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(user.getPassword(), request.oldPassword())).thenReturn(true);
+        when(passwordEncoder.matches(request.oldPassword(), user.getPassword())).thenReturn(true);
         when(passwordEncoder.encode(request.newPassword())).thenReturn("encodedNew");
 
         // when
@@ -271,7 +263,7 @@ class UserDetailsServiceImplTest {
         SecurityContextHolder.setContext(ctx);
 
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(user.getPassword(), request.oldPassword())).thenReturn(false);
+        when(passwordEncoder.matches(request.oldPassword(), user.getPassword())).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class, () -> userDetailsService.changePassword(request));
 
