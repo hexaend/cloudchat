@@ -12,11 +12,14 @@ const registrationCounter = new Counter("successful_registrations");
 
 export const options = {
     stages: [
-        { duration: "30s", target: 10 }, // Разогрев: 10 юзеров за 30 сек
-        { duration: "2m", target: 50 }, // Рост: 50 юзеров
-        { duration: "5m", target: 100 }, // Основная нагрузка: 100 юзеров
-        { duration: "2m", target: 50 }, // Снижение: обратно 50
-        { duration: "30s", target: 0 }, // Выключение
+        // { duration: "1m", target: 200 },     // 300 RPS
+        // { duration: "1m", target: 300 },     // 300 RPS
+        // { duration: "1m", target: 400 },     // 400 RPS
+        // { duration: "1m", target: 500 },     // 500 RPS
+        // { duration: "1m", target: 750 },     // 750 RPS
+        // { duration: "1m", target: 1000 },    // 1000 RPS
+        { duration: "3m", target: 10000 },    // Держим 1000 RPS
+        { duration: "1m", target: 0 },       // Снижение
     ],
     // // Total duration: 30s + 2m + 5m + 2m + 30s = 10m
     //
@@ -37,7 +40,7 @@ const testUsers = [
 
 
 
-const BASE_URL = 'http://localhost:8081';
+const BASE_URL = 'http://192.168.1.109:8081';
 
 export default function () {
     const user = testUsers[Math.floor(Math.random() * testUsers.length)];
@@ -157,10 +160,11 @@ export default function () {
     if (Math.random() < 0.2) {
         group("Registration", function () {
             const newUsername = `user_${Math.floor(Math.random() * 1000000)}`;
+            const password = `Password123!${newUsername}`;
             const registerPayload = JSON.stringify({
                 username: newUsername,
                 email: `${newUsername}@test.com`,
-                password: "Password123!",
+                password: password,
                 firstName: "Test",
                 lastName: "User",
             });
@@ -192,7 +196,7 @@ export default function () {
                 registrationCounter.add(1);
                 testUsers.push({
                     username: newUsername,
-                    password: "Password123!",
+                    password: password,
                 });
             } else {
                 errorRate.add(1);

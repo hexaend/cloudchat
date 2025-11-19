@@ -5,7 +5,7 @@ spring:
         virtual:
             enabled: true
     datasource:
-        url: jdbc:postgresql://localhost:5432/postgres_db
+        url: jdbc:postgresql://192.168.1.109:5432/postgres_db
         username: user
         password: password
         driver-class-name: org.postgresql.Driver
@@ -30,7 +30,7 @@ spring:
                     dialect: org.hibernate.dialect.PostgreSQLDialect
                 highlight_sql: false
     mail:
-        host: localhost
+        host: 192.168.1.109
         port: 1025
         username: ""
         password: ""
@@ -83,7 +83,7 @@ otel:
     exporter:
         otlp:
             protocol: grpc
-            endpoint: http://localhost:4319/
+            endpoint: http://192.168.1.109:4319/
     logs:
         exporter: none
     metrics:
