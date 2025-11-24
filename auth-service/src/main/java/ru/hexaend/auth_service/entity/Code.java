@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Code {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "verification_code_seq")
     @SequenceGenerator(name = "verification_code_seq", sequenceName = "verification_code_seq", allocationSize = 1)
     @Column(nullable = false)
     private Long id;

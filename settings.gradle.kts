@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 //include("common-files")
 include("auth-service")
 include("test-service")
+include("chat-service")

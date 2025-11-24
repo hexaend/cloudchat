@@ -26,8 +26,6 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @RequiredArgsConstructor
 public class AuthorizationServerConfig {
-
-
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
@@ -73,5 +71,4 @@ public class AuthorizationServerConfig {
 
         return http.formLogin(withDefaults()).build();
     }
-
 }

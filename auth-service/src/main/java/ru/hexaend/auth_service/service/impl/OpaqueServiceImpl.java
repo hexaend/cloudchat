@@ -1,6 +1,7 @@
 package ru.hexaend.auth_service.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,31 +9,37 @@ import ru.hexaend.auth_service.entity.RefreshToken;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.OpaqueTokenNotFoundException;
 import ru.hexaend.auth_service.repository.RefreshTokenRepository;
+import ru.hexaend.auth_service.service.interfaces.CodeService;
 import ru.hexaend.auth_service.service.interfaces.OpaqueService;
 import ru.hexaend.auth_service.utils.StringUtils;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OpaqueServiceImpl implements OpaqueService {
 
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final CodeService codeService;
 
     @Override
     public String createOpaqueToken(User user) {
         String opaqueToken = StringUtils.generateOpaqueToken();
         // TODO: get expiry date from config
         RefreshToken refreshToken = RefreshToken.builder()
-                .token(opaqueToken).user(user).expiryDate(
-                        Instant.ofEpochSecond(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)
-                ).build();
+                .token(opaqueToken)
+                .user(user)
+                .expiryDate(Instant.now().plus(7, ChronoUnit.DAYS))
+                .build();
 
-        refreshTokenRepository.save(refreshToken);
-
+        codeService.saveRefreshToken(refreshToken);
         return opaqueToken;
     }
+
+
 
     @Override
     @Transactional

@@ -16,11 +16,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {"roles"})
     Optional<User> findByUsername(@Param("username") String username);
 
-    @Query(
-            """
-                   SELECT exists(SELECT u FROM User u
-                    WHERE u.username = :username AND u.enabled = true)"""
-    )
+    @Query("""
+            SELECT exists(SELECT u FROM User u
+             WHERE u.username = :username AND u.enabled = true)""")
     Boolean existsByUsernameAndEnabledIsTrue(@Param("username") String username);
 
     @Query("""
@@ -30,8 +28,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByEmailAndEnabledIsTrue(@Param("email") String email);
 
     @Query("""
+            SELECT EXISTS(SELECT u FROM User u
+             WHERE (u.email = :email OR u.username = :username ) AND u.enabled = true)
+            """)
+    Boolean existsByEmailOrUsernameAndEnabledIsTrue(@Param("email") String email,
+                                                    @Param("username") String username);
+
+    @Query("""
             SELECT u FROM User u
             WHERE u.email = :email AND u.enabled = true
             """)
     Optional<User> getByEmail(@Param("email") String email);
+
+    @Query("""
+            SELECT u FROM User u
+            WHERE (u.id = :userId OR u.username = :username) AND u.enabled = true
+            """)
+    Optional<User> findByIdOrUsername(Long userId, String username);
 }

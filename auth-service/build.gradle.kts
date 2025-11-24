@@ -29,6 +29,7 @@ dependencies {
     // Web Dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
     //  Security Dependencies
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -38,6 +39,8 @@ dependencies {
     // JPA and Database Dependencies
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("org.postgresql:postgresql")
+//    implementation("org.flywaydb:flyway-core")
+//    implementation("org.flywaydb:flyway-database-postgresql")
 
     // Observability
     implementation("org.springframework.boot:spring-boot-starter-actuator")

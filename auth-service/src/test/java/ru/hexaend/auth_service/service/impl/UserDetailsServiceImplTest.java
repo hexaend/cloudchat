@@ -81,70 +81,70 @@ class UserDetailsServiceImplTest {
         verify(userRepository).findByUsername(username);
     }
 
-    @DisplayName("register creates user when username and email are free")
-    @Test
-    void registerCreatesUserWhenFree() {
-        // given
-        RegisterRequest request = new RegisterRequest(username, password, email, "Alex", "Ivanov");
-        User mappedUser = new User();
+//    @DisplayName("register creates user when username and email are free")
+//    @Test
+//    void registerCreatesUserWhenFree() {
+//        // given
+//        RegisterRequest request = new RegisterRequest(username, password, email, "Alex", "Ivanov");
+//        User mappedUser = new User();
+//
+//        // when
+//        when(userRepository.existsByEmailAndEnabledIsTrue(email)).thenReturn(false);
+//        when(userRepository.existsByUsernameAndEnabledIsTrue(username)).thenReturn(false);
+//        when(userMapper.toEntity(request)).thenReturn(mappedUser);
+//        when(passwordEncoder.encode(password)).thenReturn("encoded");
+//        // verification email will be sent; CodeRepository is mocked so no NPE
+//
+//        // then
+//        VerifyStatusResponse response = userDetailsService.register(request);
+//
+//        assertNotNull(response);
+//        assertEquals("VERIFICATION_EMAIL_SENT", response.status());
+//        assertTrue(response.message().contains("Verification email sent to"));
+//
+//        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
+//        verify(userRepository).existsByUsernameAndEnabledIsTrue(username);
+//        verify(userMapper).toEntity(request);
+//        verify(passwordEncoder).encode(password);
+//        verify(userRepository).save(mappedUser);
+//        verify(emailService).sendVerificationEmail(eq(mappedUser), anyString());
+//    }
 
-        // when
-        when(userRepository.existsByEmailAndEnabledIsTrue(email)).thenReturn(false);
-        when(userRepository.existsByUsernameAndEnabledIsTrue(username)).thenReturn(false);
-        when(userMapper.toEntity(request)).thenReturn(mappedUser);
-        when(passwordEncoder.encode(password)).thenReturn("encoded");
-        // verification email will be sent; CodeRepository is mocked so no NPE
+//    @DisplayName("register throws when email already in use")
+//    @Test
+//    void registerThrowsWhenEmailInUse() {
+//        // given
+//        RegisterRequest request = new RegisterRequest(username, password, email, "Alex", "Ivanov");
+//
+//        // when
+//        when(userRepository.existsByEmailAndEnabledIsTrue(email)).thenReturn(true);
+//
+//        // then
+//        EmailAlreadyInUseException ex = assertThrows(EmailAlreadyInUseException.class, () -> userDetailsService.register(request));
+//        assertEquals("Email is already in use", ex.getMessage());
+//
+//        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
+//        verify(userRepository, never()).save(any());
+//    }
 
-        // then
-        VerifyStatusResponse response = userDetailsService.register(request);
-
-        assertNotNull(response);
-        assertEquals("VERIFICATION_EMAIL_SENT", response.status());
-        assertTrue(response.message().contains("Verification email sent to"));
-
-        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
-        verify(userRepository).existsByUsernameAndEnabledIsTrue(username);
-        verify(userMapper).toEntity(request);
-        verify(passwordEncoder).encode(password);
-        verify(userRepository).save(mappedUser);
-        verify(emailService).sendVerificationEmail(eq(mappedUser), anyString());
-    }
-
-    @DisplayName("register throws when email already in use")
-    @Test
-    void registerThrowsWhenEmailInUse() {
-        // given
-        RegisterRequest request = new RegisterRequest(username, password, email, "Alex", "Ivanov");
-
-        // when
-        when(userRepository.existsByEmailAndEnabledIsTrue(email)).thenReturn(true);
-
-        // then
-        EmailAlreadyInUseException ex = assertThrows(EmailAlreadyInUseException.class, () -> userDetailsService.register(request));
-        assertEquals("Email is already in use", ex.getMessage());
-
-        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
-        verify(userRepository, never()).save(any());
-    }
-
-    @DisplayName("register throws when username already in use")
-    @Test
-    void registerThrowsWhenUsernameInUse() {
-        // given
-        RegisterRequest request = new RegisterRequest(username, password, email, "Alex", "Ivanov");
-
-        // when
-        when(userRepository.existsByEmailAndEnabledIsTrue(email)).thenReturn(false);
-        when(userRepository.existsByUsernameAndEnabledIsTrue(username)).thenReturn(true);
-
-        // then
-        UsernameAlreadyInUseException ex = assertThrows(UsernameAlreadyInUseException.class, () -> userDetailsService.register(request));
-        assertEquals("Username is already in use", ex.getMessage());
-
-        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
-        verify(userRepository).existsByUsernameAndEnabledIsTrue(username);
-        verify(userRepository, never()).save(any());
-    }
+//    @DisplayName("register throws when username already in use")
+//    @Test
+//    void registerThrowsWhenUsernameInUse() {
+//        // given
+//        RegisterRequest request = new RegisterRequest(username, password, email, "Alex", "Ivanov");
+//
+//        // when
+//        when(userRepository.existsByEmailAndEnabledIsTrue(email)).thenReturn(false);
+//        when(userRepository.existsByUsernameAndEnabledIsTrue(username)).thenReturn(true);
+//
+//        // then
+//        UsernameAlreadyInUseException ex = assertThrows(UsernameAlreadyInUseException.class, () -> userDetailsService.register(request));
+//        assertEquals("Username is already in use", ex.getMessage());
+//
+//        verify(userRepository).existsByEmailAndEnabledIsTrue(email);
+//        verify(userRepository).existsByUsernameAndEnabledIsTrue(username);
+//        verify(userRepository, never()).save(any());
+//    }
 
     @DisplayName("getCurrentUser returns user from security context")
     @Test

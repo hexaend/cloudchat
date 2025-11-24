@@ -10,6 +10,7 @@ import ru.hexaend.auth_service.dto.request.NewPasswordRequest;
 import ru.hexaend.auth_service.dto.request.RefreshTokenRequest;
 import ru.hexaend.auth_service.dto.response.AuthResponse;
 import ru.hexaend.auth_service.entity.Code;
+import ru.hexaend.auth_service.entity.Role;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.InvalidPasswordException;
 import ru.hexaend.auth_service.repository.CodeRepository;
@@ -77,6 +78,8 @@ public class AuthServiceImpl implements AuthService {
                 .findByCodeAndType(code, Code.VerificationCodeType.EMAIL_VERIFICATION)
                 .orElseThrow(RuntimeException::new); // TODO: custom exception
         User user = verificationCode.getUser();
+        Role role = userDetailsService.getDefaultUserRole();
+        user.getRoles().add(role);
         userDetailsService.setEmailVerified(user);
         codeRepository.delete(verificationCode); // TODO: use a service method for this
     }

@@ -8,7 +8,7 @@ Person(client, "Client", "Web/Mobile app")
 System_Boundary(sys, "CloudChat") {
     Container(frontend, "Frontend", "Vue.js / React", "SPA with WebSocket")
     Container(api, "Api Gateway", "Spring Cloud Gateway", "Routing, JWT validation, rate limiting")
-    Container(auth, "Auth Service", "Spring Boot", "OAuth2, JWT, registration")
+    Container(auth, "Auth Service", "Spring Boot", "OAuth2, JWT, registration, profile, friends")
 
     System_Boundary(broker, "Message Brokers") {
         ContainerQueue(rabbitmq, "RabbitMQ", "STOMP", "Real-time broadcast")
@@ -20,7 +20,7 @@ System_Boundary(sys, "CloudChat") {
         Container(message, "Message Service", "Spring Boot + WebSocket", "WebSocket connections, message persistence")
         Container(chat, "Chat Service", "Spring Boot", "Chat CRUD, members")
         Container(media, "Media Service", "Spring Boot", "File uploads, processing")
-        Container(user, "User Service", "Spring Boot + WebSocket", "User profiles, contacts, presence (online/offline/typing)")
+        Container(presense, "Presense Service", "Spring Boot + WebSocket", "User presense tracking")
     }
 
     System_Boundary(data, "Data Layer") {
@@ -46,7 +46,6 @@ Rel(frontend, api, "HTTPS/WSS")
 ' API Gateway routes (direct DNS/Docker)
 Rel(api, auth, "HTTP")
 Rel(api, message, "HTTPS/WSS")
-Rel(api, user, "HTTPS/WSS")
 Rel(api, chat, "HTTP")
 Rel(api, media, "HTTP")
 
@@ -63,9 +62,8 @@ Rel(auth, kafka, "Events")
 Rel(auth, smtp, "SMTP")
 
 ' User + Presence
-Rel(user, postgres, "JDBC")
-Rel(user, redis, "Presence data")
-Rel(kafka, user, "Events")
+Rel(presense, redis, "Redis")
+Rel(kafka, presense, "Events")
 
 ' Chat
 Rel(chat, postgres, "JDBC")

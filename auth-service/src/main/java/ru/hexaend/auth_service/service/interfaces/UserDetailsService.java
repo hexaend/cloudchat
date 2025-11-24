@@ -6,6 +6,7 @@ import ru.hexaend.auth_service.dto.request.RegisterRequest;
 import ru.hexaend.auth_service.dto.request.ResetPasswordRequest;
 import ru.hexaend.auth_service.dto.response.ResetPasswordResponse;
 import ru.hexaend.auth_service.dto.response.VerifyStatusResponse;
+import ru.hexaend.auth_service.entity.Role;
 import ru.hexaend.auth_service.entity.User;
 
 public interface UserDetailsService extends org.springframework.security.core.userdetails.UserDetailsService {
@@ -24,6 +25,9 @@ public interface UserDetailsService extends org.springframework.security.core.us
 
     void changePassword(ChangePasswordRequest request);
 
-    @Transactional
     void logoutAllSessions(User user);
+
+    Role getDefaultUserRole();
+
+    User getUserByIdOrUsername(Long userId, String username);
 }

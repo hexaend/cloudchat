@@ -5,12 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.hexaend.auth_service.entity.Role;
 import ru.hexaend.auth_service.mapper.UserMapper;
 import ru.hexaend.auth_service.service.interfaces.JwtService;
 
@@ -18,6 +20,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
@@ -37,7 +40,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (jwtToken != null) {
             String username = jwtService.getUsernameFromToken(jwtToken);
             ru.hexaend.auth_service.entity.User user = (ru.hexaend.auth_service.entity.User) userDetailsService.loadUserByUsername(username);
-
             UserPrincipal userDetails = userMapper.toUserDetails(user);
 
             var authToken = new UsernamePasswordAuthenticationToken(
@@ -48,8 +50,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
-
         filterChain.doFilter(request, response);
-
     }
 }

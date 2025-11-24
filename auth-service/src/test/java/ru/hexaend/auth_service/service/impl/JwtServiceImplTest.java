@@ -33,6 +33,7 @@ class JwtServiceImplTest {
         when(rsaPropertiesConfig.getPrivateKey()).thenReturn(privateKey);
 
         jwtService = new JwtServiceImpl(rsaPropertiesConfig);
+        jwtService.init();
     }
 
     @DisplayName("Generate Access Token Test")

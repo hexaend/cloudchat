@@ -23,8 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,7 +53,7 @@ class ProfileControllerTest extends BaseWebMvcTest {
         user.setId(1L);
         user.setUsername("alexey");
         when(userDetailsService.getCurrentUser()).thenReturn(user);
-        when(userMapper.toDto(user)).thenReturn(new UserResponse(1L, "alexey", "email@test.io", "Alex", "Ivanov", true));
+        when(userMapper.toDto(user)).thenReturn(new UserResponse(1L, "alexey", "email@test.io", "Alex", "Ivanov"));
 
         mockMvc.perform(get("/profile"))
                 .andExpect(status().isOk())
@@ -72,9 +71,10 @@ class ProfileControllerTest extends BaseWebMvcTest {
         user.setUsername("alexey");
         user.setEmailVerified(false);
         when(userDetailsService.getCurrentUser()).thenReturn(user);
-        when(userDetailsService.verifyEmail(user)).thenReturn(new VerifyStatusResponse("VERIFICATION_EMAIL_SENT", "sent"));
+        when(userDetailsService.verifyEmail(user))
+                .thenReturn(new VerifyStatusResponse("VERIFICATION_EMAIL_SENT", "sent"));
 
-        mockMvc.perform(get("/profile/verify"))
+        mockMvc.perform(post("/profile/verify"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("VERIFICATION_EMAIL_SENT")));
 
@@ -82,17 +82,17 @@ class ProfileControllerTest extends BaseWebMvcTest {
         verify(userDetailsService).verifyEmail(user);
     }
 
-//    @DisplayName("PUT /profile/password delegates to service")
-//    @Test
-//    void changePasswordUpdatesPassword() throws Exception {
-//        ChangePasswordRequest request = new ChangePasswordRequest("old", "new");
-//
-//        mockMvc.perform(put("/profile/password")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isOk());
-//
-//        verify(userDetailsService).changePassword(eq(request));
-//    }
+    // @DisplayName("PUT /profile/password delegates to service")
+    // @Test
+    // void changePasswordUpdatesPassword() throws Exception {
+    // ChangePasswordRequest request = new ChangePasswordRequest("old", "new");
+    //
+    // mockMvc.perform(put("/profile/password")
+    // .contentType(MediaType.APPLICATION_JSON)
+    // .content(objectMapper.writeValueAsString(request)))
+    // .andExpect(status().isOk());
+    //
+    // verify(userDetailsService).changePassword(eq(request));
+    // }
 
 }

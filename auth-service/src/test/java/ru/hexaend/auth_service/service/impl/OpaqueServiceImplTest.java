@@ -13,6 +13,7 @@ import ru.hexaend.auth_service.entity.RefreshToken;
 import ru.hexaend.auth_service.entity.User;
 import ru.hexaend.auth_service.exception.OpaqueTokenNotFoundException;
 import ru.hexaend.auth_service.repository.RefreshTokenRepository;
+import ru.hexaend.auth_service.service.interfaces.CodeService;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -25,6 +26,9 @@ class OpaqueServiceImplTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private CodeService codeService;
 
     @InjectMocks
     private OpaqueServiceImpl opaqueService;
@@ -40,44 +44,18 @@ class OpaqueServiceImplTest {
     private final int customLength = 16;
     private final String sampleOpaqueToken = "opaque-token";
 
-//    @DisplayName("Generate opaque token default length")
-//    @Test
-//    void generateOpaqueTokenDefaultLength() {
-//        // when
-//        String token = opaqueService.generateOpaqueToken();
-//
-//        // then
-//        assertNotNull(token);
-//        assertTrue(token.matches("[A-Za-z0-9_-]+"));
-//        assertTrue(token.length() >= defaultLength);
-//    }
-
-//    @DisplayName("Generate opaque token custom length")
-//    @Test
-//    void generateOpaqueTokenCustomLength() {
-//        // when
-//        String token = opaqueService.generateOpaqueToken(customLength);
-//
-//        // then
-//        assertNotNull(token);
-//        assertTrue(token.matches("[A-Za-z0-9_-]+"));
-//        assertTrue(token.length() >= customLength);
-//    }
-
     @DisplayName("Create opaque token saves refresh token and returns token")
     @Test
     void createOpaqueTokenSavesAndReturnsToken() {
         // given
         User user = mock(User.class);
 
-        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
         // when
         String token = opaqueService.createOpaqueToken(user);
 
         // then
         assertNotNull(token);
-        verify(refreshTokenRepository, times(1)).save(refreshTokenCaptor.capture());
+        verify(codeService, times(1)).saveRefreshToken(refreshTokenCaptor.capture());
         RefreshToken saved = refreshTokenCaptor.getValue();
         assertEquals(token, saved.getToken());
         assertEquals(user, saved.getUser());

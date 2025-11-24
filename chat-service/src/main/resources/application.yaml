@@ -1,0 +1,85 @@
+spring:
+
+    datasource:
+        url: jdbc:postgresql://localhost:5432/postgres_db
+        username: user
+        password: password
+        driver-class-name: org.postgresql.Driver
+        hikari:
+            maximum-pool-size: 20
+            minimum-idle: 5
+
+            connection-timeout: 30000
+            idle-timeout: 600000
+            max-lifetime: 1800000
+
+            auto-commit: true
+            pool-name: HikariPool-AuthService
+            driver-class-name: org.postgresql.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update
+        #        show-sql: true
+        properties:
+            hibernate:
+                connection:
+                    driver_class: org.postgresql.Driver
+                    dialect: org.hibernate.dialect.PostgreSQLDialect
+                highlight_sql: false
+
+
+    application:
+        name: chat-service
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8081
+
+server:
+    port: 8082
+
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    metrics:
+        export:
+            prometheus:
+                enabled: true
+        tags:
+            application: chat-service
+        distribution:
+            percentiles-histogram:
+                http:
+                    server:
+                        requests: "true"
+
+    endpoint:
+        prometheus:
+            access: read-only
+
+    tracing:
+        sampling:
+            probability: 1.0
+
+    observations:
+        annotations:
+            enabled: true
+
+otel:
+    exporter:
+        otlp:
+            protocol: grpc
+            endpoint: http://localhost:14317/
+    logs:
+        exporter: none
+    metrics:
+        exporter: none
+
+logging:
+    config: classpath:logback-spring.xml
+
+debug: true

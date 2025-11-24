@@ -1,11 +1,15 @@
 spring:
     application:
         name: auth-service
+
+#    flyway:
+#        baseline-on-migrate: true
+
     threads:
         virtual:
             enabled: true
     datasource:
-        url: jdbc:postgresql://192.168.1.109:5432/postgres_db
+        url: jdbc:postgresql://localhost:5432/postgres_db
         username: user
         password: password
         driver-class-name: org.postgresql.Driver
@@ -19,10 +23,11 @@ spring:
 
             auto-commit: true
             pool-name: HikariPool-AuthService
+            driver-class-name: org.postgresql.Driver
     jpa:
         hibernate:
             ddl-auto: update
-        show-sql: true
+        #        show-sql: true
         properties:
             hibernate:
                 connection:
@@ -30,7 +35,7 @@ spring:
                     dialect: org.hibernate.dialect.PostgreSQLDialect
                 highlight_sql: false
     mail:
-        host: 192.168.1.109
+        host: localhost
         port: 1025
         username: ""
         password: ""
@@ -44,7 +49,6 @@ spring:
 server:
     port: 8081
     address: localhost
-
 
 rsa:
     private-key: classpath:/keys/private.pem
@@ -65,11 +69,11 @@ management:
             percentiles-histogram:
                 http:
                     server:
-                        requests: 'true'
+                        requests: "true"
 
     endpoint:
         prometheus:
-            enabled: true
+            access: read-only
 
     tracing:
         sampling:
@@ -83,7 +87,7 @@ otel:
     exporter:
         otlp:
             protocol: grpc
-            endpoint: http://192.168.1.109:14317/
+            endpoint: http://localhost:14317/
     logs:
         exporter: none
     metrics:
@@ -91,5 +95,4 @@ otel:
 
 logging:
     config: classpath:logback-spring.xml
-
 #debug: true
