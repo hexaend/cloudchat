@@ -295,8 +295,8 @@ services:
             SCHEMA_REGISTRY_HOST_NAME: schema-registry
         depends_on:
             - broker-1
-            - broker-2
-            - broker-3
+#            - broker-2
+#            - broker-3
         networks:
             - observability-net
 
