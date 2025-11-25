@@ -1,0 +1,7 @@
+package ru.hexaend;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Common files module");
+    }
+}

@@ -31,8 +31,7 @@ public class ChatController {
     private final ChatMapper chatMapper;
 
     @Operation(summary = "Get all chats", description = "Retrieve a list of all chats for the current user")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved chats",
-            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChatResponse.class))))
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved chats", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ChatResponse.class))))
     @GetMapping
     public ResponseEntity<List<ChatResponse>> getAllChats() {
         List<Chat> chats = chatService.getAllChats();
@@ -41,8 +40,7 @@ public class ChatController {
     }
 
     @Operation(summary = "Get chat by ID", description = "Retrieve details of a specific chat by its ID")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved chat",
-            content = @Content(schema = @Schema(implementation = ChatResponse.class)))
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved chat", content = @Content(schema = @Schema(implementation = ChatResponse.class)))
     @GetMapping("/{id}")
     public ResponseEntity<ChatResponse> getChatById(@Parameter(description = "Chat ID") @PathVariable Long id) {
         Chat chat = chatService.getChatById(id);
@@ -51,35 +49,35 @@ public class ChatController {
     }
 
     @Operation(summary = "Get or create dialogue", description = "Get existing dialogue with a user or create a new one")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved or created dialogue",
-            content = @Content(schema = @Schema(implementation = ChatResponse.class)))
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved or created dialogue", content = @Content(schema = @Schema(implementation = ChatResponse.class)))
     @PostMapping("/dialogue/{userId}")
-    public ResponseEntity<ChatResponse> getOrCreateDialogue(@Parameter(description = "User ID to create dialogue with") @PathVariable Long userId) {
+    public ResponseEntity<ChatResponse> getOrCreateDialogue(
+            @Parameter(description = "User ID to create dialogue with") @PathVariable Long userId) {
         Chat chat = chatService.getOrCreateDialogue(userId);
         ChatResponse chatResponse = chatMapper.toResponse(chat);
         return ResponseEntity.ok(chatResponse);
     }
 
     @Operation(summary = "Create group chat", description = "Create a new group chat with a name")
-    @ApiResponse(responseCode = "200", description = "Successfully created group chat",
-            content = @Content(schema = @Schema(implementation = ChatResponse.class)))
+    @ApiResponse(responseCode = "200", description = "Successfully created group chat", content = @Content(schema = @Schema(implementation = ChatResponse.class)))
     @PostMapping("/group")
-    public ResponseEntity<ChatResponse> createChat(@Parameter(description = "Name of the group chat") @RequestParam String name) {
+    public ResponseEntity<ChatResponse> createChat(
+            @Parameter(description = "Name of the group chat") @RequestParam String name) {
 
         Chat chat = chatService.createGroupChat(name);
         ChatResponse chatResponse = chatMapper.toResponse(chat);
         return ResponseEntity.ok(chatResponse);
     }
 
-//    @PatchMapping
-//    public ResponseEntity<?> updateChat() {
-//        return null;
-//    }
+    // @PatchMapping
+    // public ResponseEntity<?> updateChat() {
+    // return null;
+    // }
 
-//    @DeleteMapping
-//    public ResponseEntity<?> deleteChat() {
-//        return null;
-//    }
+    // @DeleteMapping
+    // public ResponseEntity<?> deleteChat() {
+    // return null;
+    // }
 
     @Operation(summary = "Add participant", description = "Add a user to the chat")
     @ApiResponse(responseCode = "200", description = "Successfully added participant")

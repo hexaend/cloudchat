@@ -8,7 +8,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import ru.hexaend.Event;
 
 import java.util.UUID;
 
@@ -17,21 +16,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ChatApplication {
 
-    private final KafkaTemplate<String, Event> kafkaTemplate;
+//    private final KafkaTemplate<String, Event> kafkaTemplate;
 
     // TODO: kafka - last message, unread messages count
     public static void main(String[] args) {
         SpringApplication.run(ChatApplication.class, args);
     }
 
-    @Scheduled(cron = "*/5 * * * * *")
-    public void publishToKafka() {
-        Event event = Event.newBuilder()
-                .setUid(UUID.randomUUID().toString())
-                .setSubject("subject")
-                .setDescription("description")
-                .build();
+//    @Scheduled(cron = "*/5 * * * * *")
+//    public void publishToKafka() {
+//        Event event = Event.newBuilder()
+//                .setUid(UUID.randomUUID().toString())
+//                .setSubject("subject")
+//                .setDescription("description")
+//                .build();
 
 //        kafkaTemplate.send(new ProducerRecord<>("test", event.getUid(), event));
-    }
+//    }
 }

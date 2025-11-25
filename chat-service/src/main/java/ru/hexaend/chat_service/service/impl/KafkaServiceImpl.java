@@ -16,7 +16,9 @@ public class KafkaServiceImpl implements KafkaService {
 
     @Override
     public void sendCreateChatEvent(Chat chat) {
+        String eventId = generateUID();
         CreateChatEvent createChatEvent = CreateChatEvent.newBuilder()
+                .setEventId(eventId)
                 .setChatId(chat.getId())
                 .setChatName(chat.getName())
                 .setUserId(chat.getOwnerId())
@@ -28,7 +30,9 @@ public class KafkaServiceImpl implements KafkaService {
 
     @Override
     public void sendAddUserEvent(Long ownerId, Long chatId, Long userId) {
+        String eventId = generateUID();
         AddUserChatEvent addUserChatEvent = AddUserChatEvent.newBuilder()
+                .setEventId(eventId)
                 .setChatId(chatId)
                 .setUserId(ownerId)
                 .setAddedUserId(userId)
@@ -40,12 +44,19 @@ public class KafkaServiceImpl implements KafkaService {
     @Override
     public void sendRemoveUserChat(Long ownerId, Long chatId, Long userId) {
 
+        String eventId = generateUID();
+
         RemoveUserChatEvent removeUserChatEvent = RemoveUserChatEvent.newBuilder()
+                .setEventId(eventId)
                 .setChatId(chatId)
                 .setUserId(ownerId)
                 .setRemovedUserId(userId)
                 .build();
 
         kafkaTemplate.send("chat-topic", removeUserChatEvent.getChatId(), removeUserChatEvent);
+    }
+
+    private String generateUID() {
+        return java.util.UUID.randomUUID().toString();
     }
 }

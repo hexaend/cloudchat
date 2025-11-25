@@ -10,6 +10,7 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
+        maven("https://packages.confluent.io/maven/")
     }
 }
 
@@ -17,6 +18,12 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "idea")
+
+    the<DependencyManagementExtension>().apply {
+        imports {
+            mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+        }
+    }
 
     java {
         toolchain {

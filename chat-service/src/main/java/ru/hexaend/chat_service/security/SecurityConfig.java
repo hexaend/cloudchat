@@ -29,15 +29,13 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/actuator/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
+                                "/actuator/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> {
                             jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
-                        })
-                )
+                        }))
                 .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();

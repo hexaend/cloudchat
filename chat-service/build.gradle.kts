@@ -3,14 +3,6 @@ group = "ru.hexaend.auth_service"
 
 plugins {
     id("org.springframework.boot")
-    id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
-}
-
-repositories() {
-    mavenCentral()
-    maven {
-        url = uri("https://packages.confluent.io/maven/")
-    }
 }
 
 dependencyManagement {
@@ -20,6 +12,9 @@ dependencyManagement {
 }
 
 dependencies {
+
+    // Common Dependencies
+    implementation(project(":common-files"))
 
     // Web Dependencies
     implementation("org.springframework.boot:spring-boot-starter-web")
