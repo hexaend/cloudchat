@@ -6,16 +6,22 @@ import ru.hexaend.chat_service.entity.Chat;
 import ru.hexaend.chat_service.repository.ChatRepository;
 import ru.hexaend.chat_service.service.interfaces.AuthService;
 import ru.hexaend.chat_service.service.interfaces.ChatService;
+import ru.hexaend.chat_service.service.interfaces.KafkaService;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+
+// TODO: kafka transactions
+// TODO: maybe change kafka events from services to capture with Debezium 
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
     private final AuthService authService;
     private final ChatRepository chatRepository;
+    private final KafkaService kafkaService;
 
     @Override
     public List<Chat> getAllChats() {
@@ -54,25 +60,30 @@ public class ChatServiceImpl implements ChatService {
                 .name("Chat between " + ownerId + " and " + userId)
                 .ownerId(ownerId)
                 .type(Chat.ChatType.PRIVATE)
-                .participantIds(Set.of(userId))
+                .participantIds(new HashSet<>(Set.of(userId, ownerId)))
                 .build();
 
+
         chatRepository.save(newChat);
+
+        kafkaService.sendCreateChatEvent(newChat);
 
         return newChat;
     }
 
     @Override
     public Chat createGroupChat(String name) {
+        Long ownerId = authService.getCurrentUserId();
         Chat chat = Chat.builder()
                 .name(name)
-                .ownerId(authService.getCurrentUserId())
+                .ownerId(ownerId)
                 .type(Chat.ChatType.GROUP)
-                .participantIds(Set.of())
+                .participantIds(new HashSet<>(Set.of(ownerId)))
                 .build();
 
         chatRepository.save(chat);
 
+        kafkaService.sendCreateChatEvent(chat);
         return chat;
     }
 
@@ -95,6 +106,8 @@ public class ChatServiceImpl implements ChatService {
         chat.getParticipantIds().add(userId);
 
         chatRepository.save(chat);
+
+        kafkaService.sendAddUserEvent(ownerId, chatId, userId);
     }
 
     @Override
@@ -113,6 +126,7 @@ public class ChatServiceImpl implements ChatService {
         if (chat.getParticipantIds().contains(userId)) {
             chat.getParticipantIds().remove(userId);
             chatRepository.save(chat);
+            kafkaService.sendRemoveUserChat(ownerId, chatId, userId);
         } else {
             throw new RuntimeException(); // TODO: Custom exception
         }

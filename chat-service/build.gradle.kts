@@ -3,6 +3,14 @@ group = "ru.hexaend.auth_service"
 
 plugins {
     id("org.springframework.boot")
+    id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
+}
+
+repositories() {
+    mavenCentral()
+    maven {
+        url = uri("https://packages.confluent.io/maven/")
+    }
 }
 
 dependencyManagement {
@@ -24,6 +32,8 @@ dependencies {
 
     // JPA and Database Dependencies
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("io.confluent:kafka-avro-serializer:8.1.0")
     runtimeOnly("org.postgresql:postgresql")
 
     // Observability
@@ -45,4 +55,5 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
 }

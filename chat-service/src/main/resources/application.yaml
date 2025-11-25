@@ -1,5 +1,13 @@
 spring:
 
+    kafka:
+        bootstrap-servers: localhost:29092,localhost:39092,localhost:49092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.LongSerializer
+            value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+        properties:
+            schema.registry.url: http://localhost:7081
+
     datasource:
         url: jdbc:postgresql://localhost:5432/postgres_db
         username: user
@@ -82,4 +90,4 @@ otel:
 logging:
     config: classpath:logback-spring.xml
 
-debug: true
+#debug: true

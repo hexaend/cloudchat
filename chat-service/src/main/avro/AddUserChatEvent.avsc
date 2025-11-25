@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "AddUserChatEvent",
+  "namespace": "ru.hexaend.kafka.events.chat",
+  "fields": [
+    { "name": "userId", "type": "long" },
+    { "name": "chatId", "type": "long" },
+    { "name": "addedUserId", "type": "long" }
+  ]
+}
