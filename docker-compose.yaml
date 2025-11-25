@@ -188,7 +188,6 @@ services:
             - controller-1
         networks:
             - observability-net
-
     kafka-ui:
         container_name: kafka-ui
         image: provectuslabs/kafka-ui:latest
